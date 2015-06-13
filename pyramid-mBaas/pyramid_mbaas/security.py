@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 from sqlalchemy.exc import DBAPIError
 
@@ -7,34 +8,49 @@ from .models import (
 )
 from .key import ( 
     secret_key,
+    init_vec
 )
 import hashlib
 
 from Crypto.Cipher import AES
 
-GROUPS = {
-    'user':['group:users'],
-    'admin':['group:admins'],
-}
-
-secret_key = hashlib.sha256('This is secret passphrase.').digest()
-
-
-def authenticate(crypt_data, seed):
-
+def signup(name):
     try:
-        aes = AES.new(secret_key(), AES.MODE_CBC, iv)
-        name, passwd = aes.decrypt( crypt_data).split(":")
-        user = DBSession.query(User).filter(User.name == name).first()
-    except DBAPIError:
-        return False
+        seed = secret_key()
+        init_vector = init_vec()
+        print("seed:"+seed+" vector:"+init_vector)
+        if exist(name):
+            return False
 
-    if not user:
+        user = User(account = name, rank=1, HP=10, seed=seed.encode('hex'), vector=init_vector.encode('hex'))
+        DBSession.add(user)
+    except(DBAPIError):
         return False
-    
-    if user.passwd == hashlib.md5(passwd).hexdigest():
+    return True
+
+def exist(account):
+    try:
+        res = DBSession.query(User).filter(User.account == account).first()
+    except(DBAPIError):
+        return False
+    if res:
         return True
     return False
+
+def decrypt(name, data):
+
+    try:
+        if not exist(name):
+            return None
+        user = DBSession.query(User).filter(User.account == name).one()
+        aes = AES.new(secret_key(user.seed.decode('hex')), AES.MODE_CBC, user.vector.decode('hex'))
+        data = aes.decrypt(data)
+
+        print("data:"+  data)
+    except DBAPIError:
+        return None
+    
+    return data
 
 def groupfinder(name, request):
     try:
@@ -43,6 +59,6 @@ def groupfinder(name, request):
         return []   
  
     if user:
-        return GROUPS.get(user.group, [])
+        return ['group:users']
 
 

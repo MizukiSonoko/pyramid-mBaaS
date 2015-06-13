@@ -2,8 +2,9 @@
 
 import os
 import sys
-import hashlib
 import transaction
+
+from .info import email
 
 from sqlalchemy import engine_from_config
 
@@ -21,7 +22,9 @@ from ..models import (
     Box,
     Base,
     )
-
+from ..security import (
+    signup
+    )
 
 def usage(argv):
     cmd = os.path.basename(argv[0])
@@ -38,14 +41,13 @@ def main(argv=sys.argv):
     setup_logging(config_uri)
     settings = get_appsettings(config_uri, options=options)
     engine = engine_from_config(settings, 'sqlalchemy.')
+    engine.connect().connection.connection.text_factory = str 
     DBSession.configure(bind=engine)
     Base.metadata.create_all(engine)
     with transaction.manager:
-        
-        user = User(name = 'Mizuki', passwd=hashlib.md5('Password!!').hexdigest(), rank=1, HP=10)
+        signup(email)
         item1 = Item(name = u'勧誘チケット', kind='ticket', power = 1)
         item2 = Item(name = u'ミラクルストーン', kind='ticket', power = 1)
-        DBSession.add(user)
         DBSession.add(item1)
         DBSession.add(item2)
 

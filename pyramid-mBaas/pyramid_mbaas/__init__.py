@@ -16,6 +16,7 @@ from endpoint import (
 
 def main(global_config, **settings):
     engine = engine_from_config(settings, 'sqlalchemy.')
+    engine.connect().connection.connection.text_factory = str
     DBSession.configure(bind=engine)
     Base.metadata.bind = engine
 
@@ -32,6 +33,7 @@ def main(global_config, **settings):
     config.add_static_view('static', 'static', cache_max_age=3600)
     
     config.add_route('login', '/' + VERSION +'/login')
+    config.add_route('user_status', '/' + VERSION +'/user_status')
 
     
 

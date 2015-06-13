@@ -10,6 +10,7 @@ from sqlalchemy import (
     Index,
     Integer,
     Text,
+    UnicodeText,
     )
 
 from sqlalchemy.ext.declarative import declarative_base
@@ -56,16 +57,18 @@ class Box(Base):
 class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
-    name = Column(Text)
-    passwd = Column(Text)
+    account  = Column(Text)
     rank   = Column(Integer)
     HP     = Column(Integer)
-    
-    def __init__(self, name, passwd, rank, HP):
-        self.name = name
-        self.passwd = passwd
+    seed   = Column(UnicodeText(16))
+    vector = Column(UnicodeText(16))
+
+    def __init__(self, account, rank, HP, seed, vector):
+        self.account = account
         self.rank = rank
         self.HP = HP
+        self.seed = seed
+        self.vector = vector
 
 
 #Index('user_index', User.id, Box.user_id, unique=True)
