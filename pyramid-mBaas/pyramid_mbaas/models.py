@@ -10,7 +10,6 @@ from sqlalchemy import (
     Index,
     Integer,
     Text,
-    UnicodeText,
     )
 
 from sqlalchemy.ext.declarative import declarative_base
@@ -60,8 +59,8 @@ class User(Base):
     account  = Column(Text)
     rank   = Column(Integer)
     HP     = Column(Integer)
-    seed   = Column(UnicodeText(16))
-    vector = Column(UnicodeText(16))
+    seed   = Column(Text)
+    vector = Column(Text)
 
     def __init__(self, account, rank, HP, seed, vector):
         self.account = account

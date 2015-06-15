@@ -16,9 +16,9 @@ from Crypto.Cipher import AES
 
 def signup(name):
     try:
-        seed = secret_key()
-        init_vector = init_vec()
-        print("seed:"+seed+" vector:"+init_vector)
+        seed = hashlib.sha256(os.urandom(16)).digest()
+        init_vector = os.urandom(16)
+        print("seed:"+seed.encode('hex')+" vector:"+init_vector.encode('hex'))
         if exist(name):
             return False
 
@@ -42,8 +42,9 @@ def decrypt(name, data):
     try:
         if not exist(name):
             return None
+        print("user exist")
         user = DBSession.query(User).filter(User.account == name).one()
-        aes = AES.new(secret_key(user.seed.decode('hex')), AES.MODE_CBC, user.vector.decode('hex'))
+        aes = AES.new(user.seed.decode('hex')), AES.MODE_CBC, user.vector.decode('hex'))
         data = aes.decrypt(data)
 
         print("data:"+  data)
