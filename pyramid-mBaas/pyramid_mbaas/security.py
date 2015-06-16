@@ -7,6 +7,10 @@ from .models import (
     User,
     Key,
 )
+from .manager import (
+    exist,
+)
+
 import hashlib
 from Crypto.Cipher import AES
 
@@ -27,18 +31,13 @@ def signup(seed):
         DBSession.add(user)
         DBSession.add(key)
 
+        return {
+            'user_id':user_id, 
+            'seed':seed.encode('hex'),
+            'vector':vector.encode('hex')
+        }
     except(DBAPIError):
         return None
-    return user_id, seed.eencode('hex'), vector.encode('hex')
-
-def exist(user_id):
-    try:
-        res = DBSession.query(Key).filter(Key.user_id == user_id).first()
-    except(DBAPIError):
-        return False
-    if res:
-        return True
-    return False
 
 def decrypt(user_id ,data):
     try:
@@ -50,9 +49,20 @@ def decrypt(user_id ,data):
         data = aes.decrypt(data)
 
         print("data:"+  data)
-    except DBAPIError:
+    except(DBAPIError):
         return None
     
     return data
 
+def encrypt(user_id, data):
+    try:
+        if not exist(user_id):
+            return None
+        
+        key = DBSession.query(Key).filter(Key.user_id == user_id).one()
+        aes = AES.new(key.seed.decode('hex'), AES.MODE_CBC, key.vector.decode('hex'))
+        result = aes.encrypt(data)
+    except(DBAPIError):
+        return None
 
+    return data
