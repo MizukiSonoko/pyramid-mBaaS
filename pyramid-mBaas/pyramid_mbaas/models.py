@@ -39,14 +39,13 @@ class Item(Base):
 class Box(Base):
     __tablename__ = 'boxs'
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
+    user_id = Column(Text, ForeignKey('users.user_id'))
     item_id = Column(Integer, ForeignKey('items.id'))
     count   = Column(Integer)
 
 class User(Base):
     __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Text)
+    user_id = Column(Text, primary_key=True)
     name = Column(Text)
     rank   = Column(Integer)
     HP     = Column(Integer)
@@ -59,8 +58,7 @@ class User(Base):
 
 class Key(Base):
     __tablename__ = 'keys'
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Text)
+    user_id = Column(Text, primary_key=True)
     seed    = Column(Text)
     vector  = Column(Text)
 

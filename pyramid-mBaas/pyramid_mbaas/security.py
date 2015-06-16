@@ -11,21 +11,19 @@ from .manager import (
     exist,
 )
 
-import hashlib
+import hashlib, os
 from Crypto.Cipher import AES
 
 def signup(seed):
     try:
         seed = hashlib.sha256(seed).digest()
         init_vector = os.urandom(16)
-        print("seed:"+seed.encode('hex')+" vector:"+init_vector.encode('hex'))
-        
         user_id = hashlib.sha256(seed.encode('hex')+init_vector.encode('hex')).hexdigest()
         
         if exist(user_id):
             return None
         
-        key = Key(user_id = user_id, seed = seed.encode('hex'), vector = vector.encode('hex'))
+        key = Key(user_id = user_id, seed = seed.encode('hex'), vector = init_vector.encode('hex'))
         user = User(name = "", rank=1, HP=10, user_id = user_id)
 
         DBSession.add(user)
@@ -34,7 +32,7 @@ def signup(seed):
         return {
             'user_id':user_id, 
             'seed':seed.encode('hex'),
-            'vector':vector.encode('hex')
+            'vector':init_vector.encode('hex')
         }
     except(DBAPIError):
         return None
@@ -43,12 +41,9 @@ def decrypt(user_id ,data):
     try:
         if not exist(user_id):
             return None
-        print("user exist")
         key = DBSession.query(Key).filter(Key.user_id == user_id).one()
         aes = AES.new(key.seed.decode('hex'), AES.MODE_CBC, key.vector.decode('hex'))
         data = aes.decrypt(data)
-
-        print("data:"+  data)
     except(DBAPIError):
         return None
     
@@ -61,8 +56,9 @@ def encrypt(user_id, data):
         
         key = DBSession.query(Key).filter(Key.user_id == user_id).one()
         aes = AES.new(key.seed.decode('hex'), AES.MODE_CBC, key.vector.decode('hex'))
+        data = data + (16 - (len(data) % 16))*" "
         result = aes.encrypt(data)
     except(DBAPIError):
         return None
 
-    return data
+    return result

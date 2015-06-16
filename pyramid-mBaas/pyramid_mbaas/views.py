@@ -12,6 +12,9 @@ from sqlalchemy.exc import DBAPIError
 from .models import (
     DBSession,
 )
+from .response import (
+    ForbiddenResponse,
+)
 from .endpoint import (
     VERSION,
 )
@@ -22,7 +25,10 @@ from .security import (
 )
 from .manager import (
     get_user,
+    update_user,
 )
+
+import json
 
 @view_config(route_name='sign_up', request_method='POST', renderer='json')
 def sign_up(request):
@@ -42,14 +48,46 @@ def sign_up(request):
             status = '200 OK',
             content_type='application/json')
 
-    return Response(
-        body=json.dumps(
-            {'code':'403',
-             'message':'Invalied request'
-            }
-        ),
-        status = '403 forbidden',
-        content_type='application/json')
+    return ForbiddenResponse
+
+@view_config(route_name='update', request_method='POST', renderer='json')
+def update(request):
+    user_id = None
+    data    = None
+    if 'user_id' in request.params and 'data' in request.params:
+        user_id = request.params['user_id']
+        data    = request.params['data']
+
+        data    = decrypt(user_id, data.decode('hex'))
+        data    = data.strip()
+        try:
+            data = json.loads(data)
+        except(ValueError):
+            return ForbiddenResponse
+        name = None
+        rank = None
+        HP   = None
+        if 'name' in data:
+            name = data['name']
+        if 'rank' in data:
+            rank = data['rank']
+        if 'HP' in data:
+            HP   = data['HP']
+        if name or rank or HP:
+            result = update_user(user_id=user_id, name=name, rank=rank, HP=HP)
+            if result:
+                return Response( 
+                    body=json.dumps(
+                        {
+                        'code':'200',
+                        'message':'update successful',
+                        }
+                    ),
+                    status = '200 OK',
+                    content_type='application/json'
+                )
+    return ForbiddenResponse
+
 
 @view_config(route_name='user_status', request_method='POST', renderer='json')
 def user_status(request):
@@ -59,13 +97,7 @@ def user_status(request):
         user = get_user(user_id)
         if user:
             data = user.name
-            print('#'*30)
-            print(data)
-            print('#'*30)
-            data = encrypt(user_id, data)
-            print('#'*30)
-            print(data)
-            print('#'*30)
+            data = encrypt(user_id, data).encode('hex')
             return Response( 
                 body=json.dumps(
                     {
@@ -78,15 +110,7 @@ def user_status(request):
                 content_type='application/json'
             )
 
-    return Response(
-        body=json.dumps(
-            {'code':'403',
-             'message':'invalied'
-            }
-        ),
-        status = '403 forbidden',
-        content_type='application/json'
-    )
+    return ForbiddenResponse
 
 @notfound_view_config()
 def not_found(request):

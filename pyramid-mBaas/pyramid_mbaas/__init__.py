@@ -23,6 +23,7 @@ def main(global_config, **settings):
     config.add_static_view('static', 'static', cache_max_age=3600)
     
     config.add_route('sign_up', '/' + VERSION +'/sign_up')
+    config.add_route('update', '/' + VERSION +'/update')
     config.add_route('user_status', '/' + VERSION +'/user_status')
     
     config.scan()
