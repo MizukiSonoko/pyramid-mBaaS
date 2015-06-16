@@ -23,18 +23,16 @@ from .security import (
     )
 
 
-@view_config(route_name='login', request_method='POST', renderer='json')
-def login(request):
+@view_config(route_name='sign_up', request_method='POST', renderer='json')
+def sign_up(request):
     account = None
     data = None
     if 'account' in request.params:
-        account = request.params['account']
-    if 'seed' in request.params:
-        seed = request.params['seed']
-    if 'vector' in request.params:
-        vec  = request.params['vector']
+        account =  request.params['account']
+    if 'data' in request.params:
+        data = request.params['data']
 
-    if account and seed and vec:
+    if account and data:
         account = account + (16-(len(account)%16))*"$"
         user = authenticate( account, os.urandom(16), os.urandom(16))
         if user:
@@ -67,8 +65,11 @@ def user_status(request):
     if 'data' in request.params:
         data = request.params['data']
     if account and data:
-        data = decript(account, data)
-    print(data)
+        print("AC:"+account+" data:"+data)
+        data = decrypt(account, data.decode('hex'))
+        print('#'*30)
+        print(data)
+        print('#'*30)
     # TODO execute to update.
     return {}
 

@@ -24,16 +24,6 @@ from zope.sqlalchemy import ZopeTransactionExtension
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 Base = declarative_base()
 
-class RootFactory(object):
-    __acl__ =  [
-                (Deny,  Everyone, 'view'),
-                (Allow, 'group:users', 'user'),
-                (Allow, 'group:admins',  'admin'), 
-    ]
-
-    def __init__(self, request):
-        pass
-
 class Item(Base):
     __tablename__ = 'items'
     id = Column(Integer, primary_key=True)
@@ -56,18 +46,23 @@ class Box(Base):
 class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
-    account  = Column(Text)
+    user_id = Column(Text)
+    name = Column(Text)
     rank   = Column(Integer)
     HP     = Column(Integer)
-    seed   = Column(Text)
-    vector = Column(Text)
 
-    def __init__(self, account, rank, HP, seed, vector):
-        self.account = account
+    def __init__(self, user_id, name, rank, HP):
+        self.user_id = user_id
+        self.name = name
         self.rank = rank
         self.HP = HP
-        self.seed = seed
-        self.vector = vector
+
+class Key(Base):
+    __tablename__ = 'keys'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Text)
+    seed    = Column(Text)
+    vector  = Column(Text)
 
 
 #Index('user_index', User.id, Box.user_id, unique=True)

@@ -5,46 +5,48 @@ from sqlalchemy.exc import DBAPIError
 from .models import (
     DBSession,
     User,
-)
-from .key import ( 
-    secret_key,
-    init_vec
+    Key,
 )
 import hashlib
-
 from Crypto.Cipher import AES
 
-def signup(name):
+def signup(seed):
     try:
-        seed = hashlib.sha256(os.urandom(16)).digest()
+        seed = hashlib.sha256(seed).digest()
         init_vector = os.urandom(16)
         print("seed:"+seed.encode('hex')+" vector:"+init_vector.encode('hex'))
-        if exist(name):
-            return False
+        
+        user_id = hashlib.sha256(seed.encode('hex')+init_vector.encode('hex')).hexdigest()
+        
+        if exist(user_id):
+            return None
+        
+        key = Key(user_id = user_id, seed = seed.encode('hex'), vector = vector.encode('hex'))
+        user = User(name = "", rank=1, HP=10, user_id = user_id)
 
-        user = User(account = name, rank=1, HP=10, seed=seed.encode('hex'), vector=init_vector.encode('hex'))
         DBSession.add(user)
-    except(DBAPIError):
-        return False
-    return True
+        DBSession.add(key)
 
-def exist(account):
+    except(DBAPIError):
+        return None
+    return user_id, seed.eencode('hex'), vector.encode('hex')
+
+def exist(user_id):
     try:
-        res = DBSession.query(User).filter(User.account == account).first()
+        res = DBSession.query(Key).filter(Key.user_id == user_id).first()
     except(DBAPIError):
         return False
     if res:
         return True
     return False
 
-def decrypt(name, data):
-
+def decrypt(user_id ,data):
     try:
-        if not exist(name):
+        if not exist(user_id):
             return None
         print("user exist")
-        user = DBSession.query(User).filter(User.account == name).one()
-        aes = AES.new(user.seed.decode('hex')), AES.MODE_CBC, user.vector.decode('hex'))
+        key = DBSession.query(Key).filter(Key.user_id == user_id).one()
+        aes = AES.new(key.seed.decode('hex'), AES.MODE_CBC, key.vector.decode('hex'))
         data = aes.decrypt(data)
 
         print("data:"+  data)
@@ -52,14 +54,5 @@ def decrypt(name, data):
         return None
     
     return data
-
-def groupfinder(name, request):
-    try:
-        user = DBSession.query(User).filter(User.name == name).one()
-    except DBAPIError:
-        return []   
- 
-    if user:
-        return ['group:users']
 
 
