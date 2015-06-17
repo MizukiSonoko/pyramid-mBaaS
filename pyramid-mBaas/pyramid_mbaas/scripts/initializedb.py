@@ -48,6 +48,8 @@ def main(argv=sys.argv):
         signup(email)
         item1 = Item(name = u'勧誘チケット', kind='ticket', power = 1)
         item2 = Item(name = u'ミラクルストーン', kind='ticket', power = 1)
+        
+        
         DBSession.add(item1)
         DBSession.add(item2)
 

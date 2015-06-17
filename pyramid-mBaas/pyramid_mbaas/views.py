@@ -81,6 +81,7 @@ def update(request):
                         {
                         'code':'200',
                         'message':'update successful',
+                        'data':''
                         }
                     ),
                     status = '200 OK',
@@ -88,6 +89,14 @@ def update(request):
                 )
     return ForbiddenResponse
 
+@view_config(route_name='gatya', request_method='POST', renderer='json')
+def gatya(request):
+    user_id = None
+    if 'user_id' in request.params:
+        user_id =  request.params['user_id']
+        user = get_user(user_id)
+        if user:
+            pass
 
 @view_config(route_name='user_status', request_method='POST', renderer='json')
 def user_status(request):
@@ -117,7 +126,8 @@ def not_found(request):
     return Response(
         body=json.dumps(
             {'code':'404',
-             'message':'Endpoint not found'
+             'message':'Endpoint not found',
+             'data':'',
             }
         ),
         status='404 Not Found',

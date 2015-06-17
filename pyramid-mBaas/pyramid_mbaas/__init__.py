@@ -25,6 +25,7 @@ def main(global_config, **settings):
     config.add_route('sign_up', '/' + VERSION +'/sign_up')
     config.add_route('update', '/' + VERSION +'/update')
     config.add_route('user_status', '/' + VERSION +'/user_status')
+    config.add_route('gatya', '/' + VERSION +'/gatya')
     
     config.scan()
     return config.make_wsgi_app()

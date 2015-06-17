@@ -76,6 +76,7 @@ class TestFunctionSuccessCondition(unittest.TestCase):
 
         data = encrypt(self.user_id, '{"name":"Mizuki"}')
         data = data.encode('hex')
+        print("POST DATA:"+data)
         res = self.app.post('/'+ VERSION +'/update',{
             'user_id': self.user_id,
             'data':data,
