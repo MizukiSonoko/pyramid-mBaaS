@@ -22,6 +22,7 @@ from .security import (
     signup,
     decrypt,
     encrypt,
+    key_gen,
 )
 from .manager import (
     get_user,
@@ -82,7 +83,7 @@ def update(request):
                         'code':'200',
                         'message':'update successful',
                         'data':''
-                        }
+                        }.update(key_gen())
                     ),
                     status = '200 OK',
                     content_type='application/json'
@@ -113,7 +114,7 @@ def user_status(request):
                     'code':'200',
                     'message':'valied',
                     'data'   : data,
-                    }
+                    }.update(key_gen())
                 ),
                 status = '200 OK',
                 content_type='application/json'

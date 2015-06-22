@@ -16,8 +16,8 @@ from Crypto.Cipher import AES
 
 def signup(seed):
     try:
-        seed = hashlib.sha256(seed).digest()
-        init_vector = os.urandom(16)
+        seed = key_gen()['seed']
+        init_vector = key_gen()['vector']
         user_id = hashlib.sha256(seed.encode('hex')+init_vector.encode('hex')).hexdigest()
         
         if exist(user_id):
@@ -36,6 +36,15 @@ def signup(seed):
         }
     except(DBAPIError):
         return None
+
+
+def key_gen():
+    seed = hashlib.sha256(seed).digest()
+    init_vector = os.urandom(16)
+    return {
+        'seed':seed,
+        'vector':init_vector,
+    }
 
 def decrypt(user_id ,data):
     try:
