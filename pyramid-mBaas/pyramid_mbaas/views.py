@@ -14,6 +14,8 @@ from .models import (
 )
 from .response import (
     ForbiddenResponse,
+    NotFoundResponse,
+    OkResponse,
 )
 from .endpoint import (
     VERSION,
@@ -77,17 +79,8 @@ def update(request):
         if name or rank or HP:
             result = update_user(user_id=user_id, name=name, rank=rank, HP=HP)
             if result:
-                return Response( 
-                    body=json.dumps(
-                        {
-                        'code':'200',
-                        'message':'update successful',
-                        'data':''
-                        }.update(key_gen())
-                    ),
-                    status = '200 OK',
-                    content_type='application/json'
-                )
+                return OkResponse()
+
     return ForbiddenResponse
 
 @view_config(route_name='gatya', request_method='POST', renderer='json')
@@ -108,29 +101,12 @@ def user_status(request):
         if user:
             data = user.name
             data = encrypt(user_id, data).encode('hex')
-            return Response( 
-                body=json.dumps(
-                    {
-                    'code':'200',
-                    'message':'valied',
-                    'data'   : data,
-                    }.update(key_gen())
-                ),
-                status = '200 OK',
-                content_type='application/json'
-            )
+            return OkResponse(data)
 
     return ForbiddenResponse
 
+
 @notfound_view_config()
 def not_found(request):
-    return Response(
-        body=json.dumps(
-            {'code':'404',
-             'message':'Endpoint not found',
-             'data':'',
-            }
-        ),
-        status='404 Not Found',
-        content_type='application/json')
+    return NotFoundResponse
 
